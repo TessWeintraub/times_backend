@@ -5,6 +5,9 @@ import { PostsService } from './posts/posts.service';
 import { PostsModule } from './posts/posts.module';
 import {PostsController} from "./posts/posts.controller";
 import { join } from 'path'
+import { PostsEntity } from "./posts/posts.entity";
+// import { UsersModule } from './users/users/users.module';
+// import { UsersModule } from './users/users.module';
 
 
 @Module({
@@ -21,10 +24,11 @@ import { join } from 'path'
             username: process.env.POSTGRES_USER,
             password: process.env.POSTGRES_PASSWORD,
             database: process.env.POSTGRES_DB,
-            entities: [join(__dirname, '**','*.entity.{ts.js}')],
+            entities: [PostsEntity],
             synchronize: true,
         }),
-        PostsModule
+        PostsModule,
+        // UsersModule
     ]
 })
 export class AppModule {

@@ -8,15 +8,18 @@ export class PostsEntity{
     @Column()
     title: string
 
-    // @Column({type: 'text'})
-    // content: string
-    //
-    // @Column({type: 'text'})
-    // imageUrl: string
+    @Column({type: 'text'})
+    content: string
 
-    // @Column({type: 'array'})
-    // tags: []
+    @Column({type: 'text'})
+    imageUrl: string
 
-    // @Column({type: 'integer'})
-    // userId: number
+    @Column({type: 'text', array: true})
+    tags: string[]
+
+    @Column({type: 'integer', default: 0})
+    viewsCount: number
+
+    @Column({type: 'integer'})
+    userId: number
 }
