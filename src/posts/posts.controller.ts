@@ -7,21 +7,19 @@ export class PostsController {
     constructor(private  readonly  postsService: PostsService) {}
 
     @Get()
-    async getAll(@Query('sort') sort: string, @Query('tag') tag: string){
+    async getAll(
+        @Query('sort') sort: string,
+        @Query('filter') filter: string,
+        @Query('req') req: string,
+        @Query('search') search: string
+    ){
+        if (sort && filter) return this.postsService.sortAndFilter(filter,sort)
         if (sort) return this.postsService.sort(sort)
-        if (tag) return this.postsService.filterByTag(tag)
+        if (filter) return this.postsService.filterByTag(filter)
+        if (req) return this.postsService.tags()
+        if (search) return this.postsService.search(search)
         return this.postsService.getAll()
     }
-
-    // @Get('filter')
-    // async filterByTag(@Query('tag') tag: string){
-    //     return this.postsService.filterByTag(tag)
-    // }
-    //
-    // @Get('sort')
-    // async sort(@Query('sort') sort: string){
-    //     return this.postsService.sort(sort)
-    // }
 
     @Get(':id')
     async getById(@Param('id') id: string){
@@ -34,8 +32,8 @@ export class PostsController {
     }
 
     @Patch(':id')
-    async updateById(@Body() viewsCount: number,@Param('id') id: string){
-        return this.postsService.updateById(Number(id), viewsCount['viewsCount'])
+    async updateById(@Param('id') id: string){
+        return this.postsService.updateById(Number(id))
     }
 
     @Delete(':id')

@@ -1,7 +1,7 @@
 import {Body, Injectable} from '@nestjs/common';
 import {InjectRepository} from "@nestjs/typeorm";
 import {PostsEntity} from "./posts.entity";
-import { Any, In, Repository } from "typeorm";
+import {Repository} from "typeorm";
 import {PostsDto} from "./posts.dto";
 
 @Injectable()
@@ -12,6 +12,17 @@ export class PostsService {
         return await this.postRepository.find({order: {id: 1}})
     }
 
+    async tags() {
+        const allPosts = await this.getAll()
+        const allTags = allPosts.map(post => post.tags).flat()
+        const uniqTags = [...new Set(allTags)]
+        return (uniqTags)
+    }
+
+    async search(search) {
+        return await this.postRepository.find({where: {title: search}})
+    }
+
     async getById(id: number){
         return await this.postRepository.findOne({
             where: {
@@ -20,12 +31,19 @@ export class PostsService {
         })
     }
 
-    async filterByTag(tag: string){
-        // return await this.postRepository.find({
-        //     where: {
-        //         tags : Any(tag)
-        //     }
-        // })
+    async filterByTag(filter: string){
+        return await this.postRepository
+            .createQueryBuilder('post')
+            .where('post.tags @> ARRAY[:...tags]', { tags: filter.split(',')})
+            .getMany();
+    }
+
+    async sortAndFilter(filter: string, sort: string){
+        return await this.postRepository
+            .createQueryBuilder('post')
+            .where('post.tags @> ARRAY[:...tags]', { tags: filter.split(',')})
+            .orderBy(`${[sort]}`)
+            .getMany();
     }
 
     async sort(sort: string){
@@ -33,13 +51,16 @@ export class PostsService {
     }
 
     async create(@Body() dto: PostsDto){
-        const post = await this.postRepository.create(dto)
+        const post = await this.postRepository.create({
+            ...dto,
+            date: Date.now()
+        })
         await this.postRepository.save(post)
         return await this.getAll()
     }
 
-    async updateById(id: number, viewsCount: number){
-        await this.postRepository.update({id: id},{viewsCount: viewsCount})
+    async updateById(id: number){
+        await this.postRepository.increment({id: id}, 'views_count', 1)
         return await this.getAll()
     }
 

@@ -18,7 +18,13 @@ export class PostsEntity{
     tags: string[]
 
     @Column({type: 'integer', default: 0})
-    viewsCount: number
+    views_count: number
+
+    @Column({type: 'bigint' })
+    date: number
+
+    @Column({type: 'text', default: '45 min read'})
+    timeRead: string
 
     @Column({type: 'integer'})
     userId: number
