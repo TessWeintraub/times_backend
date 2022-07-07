@@ -1,6 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
+import {Body, Controller, Delete, Get, Param, Patch, Post, Query, UploadedFile, UseInterceptors, Headers} from "@nestjs/common";
 import {PostsDto} from "./posts.dto";
 import {PostsService} from "./posts.service";
+import {FileInterceptor} from "@nestjs/platform-express";
 
 @Controller('posts')
 export class PostsController {
@@ -27,8 +28,13 @@ export class PostsController {
     }
 
     @Post()
-    async create(@Body() dto: PostsDto){
-        return this.postsService.create(dto)
+    @UseInterceptors(FileInterceptor('file'))
+    async create(@Body() dto: any, @UploadedFile() file: Express.Multer.File, @Headers() headers : any){
+        console.log(headers)
+        console.log(dto)
+        // @ts-ignore
+        return  {}
+        // return this.postsService.create(JSON.parse(dto), file)
     }
 
     @Patch(':id')

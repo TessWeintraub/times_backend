@@ -1,8 +1,12 @@
-import {Body, Injectable} from '@nestjs/common';
+import {Body, Injectable, UploadedFile} from '@nestjs/common';
 import {InjectRepository} from "@nestjs/typeorm";
 import {PostsEntity} from "./posts.entity";
 import {Repository} from "typeorm";
 import {PostsDto} from "./posts.dto";
+import * as path from "path";
+import * as EasyYandexS3 from "easy-yandex-s3";
+
+
 
 @Injectable()
 export class PostsService {
@@ -50,13 +54,18 @@ export class PostsService {
         return await this.postRepository.find({order:{ [sort] : 1}})
     }
 
-    async create(@Body() dto: PostsDto){
-        const post = await this.postRepository.create({
-            ...dto,
-            date: Date.now()
-        })
-        await this.postRepository.save(post)
-        return await this.getAll()
+    async create(@Body() dto: PostsDto, @UploadedFile() file: Express.Multer.File){
+        try {
+            const post = await this.postRepository.create({
+                ...dto,
+                imageUrl: await this.uploadImage(file),
+                date: Date.now()
+            })
+            await this.postRepository.save(post)
+            return await this.getAll()
+        } catch (e){
+            console.log(e)
+        }
     }
 
     async updateById(id: number){
@@ -68,4 +77,39 @@ export class PostsService {
         await this.postRepository.delete({id: id})
         return await this.getAll()
     }
+
+
+
+    async uploadImage(file){
+        const s3 = new EasyYandexS3({
+            auth: {
+                accessKeyId: process.env.ACCESS_KEY_ID,
+                secretAccessKey: process.env.SECRET_ACCESS_KEY,
+            },
+            Bucket: `${process.env.BUCKET}`
+        })
+        try {
+            const upload = await s3.Upload({
+                buffer: file.buffer
+            },  process.env.BUCKET_DIR );
+            return upload.Location
+        }
+        catch (e) {
+            console.log('===>e', e)
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
