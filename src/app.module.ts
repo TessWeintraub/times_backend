@@ -1,13 +1,9 @@
 import {Module} from "@nestjs/common";
 import {TypeOrmModule} from "@nestjs/typeorm";
 import {ConfigModule} from "@nestjs/config";
-import { PostsService } from './posts/posts.service';
 import { PostsModule } from './posts/posts.module';
-import {PostsController} from "./posts/posts.controller";
-import { join } from 'path'
 import { PostsEntity } from "./posts/posts.entity";
-// import { UsersModule } from './users/users/users.module';
-// import { UsersModule } from './users/users.module';
+
 
 
 @Module({
@@ -27,8 +23,7 @@ import { PostsEntity } from "./posts/posts.entity";
             entities: [PostsEntity],
             synchronize: true,
         }),
-        PostsModule,
-        // UsersModule
+        PostsModule
     ]
 })
 export class AppModule {

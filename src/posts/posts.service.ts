@@ -1,10 +1,14 @@
-import {Body, Injectable, UploadedFile} from '@nestjs/common';
+import {Injectable} from '@nestjs/common';
 import {InjectRepository} from "@nestjs/typeorm";
 import {PostsEntity} from "./posts.entity";
 import {Repository} from "typeorm";
 import {PostsDto} from "./posts.dto";
-import * as path from "path";
 import * as EasyYandexS3 from "easy-yandex-s3";
+import {
+    paginate,
+    Pagination,
+    IPaginationOptions,
+} from 'nestjs-typeorm-paginate';
 
 
 
@@ -12,20 +16,55 @@ import * as EasyYandexS3 from "easy-yandex-s3";
 export class PostsService {
     constructor(@InjectRepository(PostsEntity) private postRepository: Repository<PostsEntity>) {}
 
-    async getAll(){
-        return await this.postRepository.find({order: {id: 1}})
+    async getAll(
+      sort: string,
+      filter: string,
+      search: string,
+      options: IPaginationOptions
+    ): Promise<Pagination<PostsEntity>>
+    {
+        // Если с клиента придет какая-либо сортировка, то сортируем от большего к меньшему, иначе от меньшего к большему
+        const order = sort !== 'id' ? "DESC" : "ASC"
+
+
+        if (search && filter){
+            const queryBuilder = await this.postRepository.createQueryBuilder('post')
+              .where('post.tags @> ARRAY[:...tags]', { tags: filter.split(',') })
+              .andWhere('post.title like %:search%', { search: search })
+              .orderBy(`${sort}`, `${order}` )
+
+            return await paginate<PostsEntity>( queryBuilder, options )
+        }
+        if (filter){
+            const queryBuilder = await this.postRepository.createQueryBuilder('post')
+              .where('post.tags @> ARRAY[:...tags]', { tags: filter.split(',')})
+              .orderBy(`${sort}`, `${order}` )
+
+            return await paginate<PostsEntity>( queryBuilder, options )
+        }
+
+        if (search){
+            const queryBuilder = await this.postRepository.createQueryBuilder('post')
+              .where( 'post.title like :search', { search: `%${search}%` })
+              .orderBy(`${sort}`, `${order}` )
+
+            return await paginate<PostsEntity>( queryBuilder, options )
+        }
+
+        const queryBuilder = await this.postRepository.createQueryBuilder('post')
+          .orderBy(`post.${sort}`, `${order}`)
+        return await paginate<PostsEntity>( queryBuilder, options )
     }
 
+
+    // Возвращает уникальные теги(категории) постов
     async tags() {
-        const allPosts = await this.getAll()
+        const allPosts = await this.postRepository.find()
         const allTags = allPosts.map(post => post.tags).flat()
         const uniqTags = [...new Set(allTags)]
         return (uniqTags)
     }
 
-    async search(search) {
-        return await this.postRepository.find({where: {title: search}})
-    }
 
     async getById(id: number){
         return await this.postRepository.findOne({
@@ -35,26 +74,8 @@ export class PostsService {
         })
     }
 
-    async filterByTag(filter: string){
-        return await this.postRepository
-            .createQueryBuilder('post')
-            .where('post.tags @> ARRAY[:...tags]', { tags: filter.split(',')})
-            .getMany();
-    }
 
-    async sortAndFilter(filter: string, sort: string){
-        return await this.postRepository
-            .createQueryBuilder('post')
-            .where('post.tags @> ARRAY[:...tags]', { tags: filter.split(',')})
-            .orderBy(`${[sort]}`)
-            .getMany();
-    }
-
-    async sort(sort: string){
-        return await this.postRepository.find({order:{ [sort] : 1}})
-    }
-
-    async create(@Body() dto: PostsDto, @UploadedFile() file: Express.Multer.File){
+    async create(dto: PostsDto, file: Express.Multer.File){
         try {
             const post = await this.postRepository.create({
                 ...dto,
@@ -62,7 +83,7 @@ export class PostsService {
                 date: Date.now()
             })
             await this.postRepository.save(post)
-            return await this.getAll()
+            return {}
         } catch (e){
             console.log(e)
         }
@@ -70,16 +91,17 @@ export class PostsService {
 
     async updateById(id: number){
         await this.postRepository.increment({id: id}, 'views_count', 1)
-        return await this.getAll()
+        return {message: 'Обновленно'}
     }
 
+
+    // На данный момент не используется
     async deleteById(id: number){
         await this.postRepository.delete({id: id})
-        return await this.getAll()
+        return {message: 'Пост удален'}
     }
 
-
-
+    // Скорее всего это нужно вынести с сервиса, но не знаю как
     async uploadImage(file){
         const s3 = new EasyYandexS3({
             auth: {
@@ -98,18 +120,4 @@ export class PostsService {
             console.log('===>e', e)
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
