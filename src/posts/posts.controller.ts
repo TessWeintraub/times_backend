@@ -17,10 +17,11 @@ import {PostsService} from "./posts.service";
 import {FileInterceptor} from "@nestjs/platform-express";
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { PostsEntity } from "./posts.entity";
-import { ApiOperation, ApiProperty, ApiResponse } from "@nestjs/swagger";
+import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { CreatePostsDto } from "./dto/createPosts.dto";
 import { SearchIdPostDto } from "./dto/searchIdPost.dto";
 import { DeleteIdPostDto } from "./dto/deleteIdPost.dto";
+import { ApiImplicitFile } from "@nestjs/swagger/dist/decorators/api-implicit-file.decorator";
 
 @Controller('posts')
 export class PostsController {
@@ -59,6 +60,9 @@ export class PostsController {
     // Создание поста, принимает файл и данные о посте
     @ApiOperation({summary: 'Создание поста'})
     @ApiResponse({status: 201, type: [PostsEntity]})
+    @ApiConsumes('multipart/form-data')
+    @ApiImplicitFile({ name: 'file', required: true, description: 'Изображение' })
+    @ApiBody({ description: 'Данные для создания', type: [CreatePostsDto]})
     @Post()
     @UseInterceptors(FileInterceptor('file'))
     async create(@Body('body') dto: string, @UploadedFile() file: Express.Multer.File){
