@@ -2,8 +2,10 @@ import {Injectable} from '@nestjs/common';
 import {InjectRepository} from "@nestjs/typeorm";
 import {PostsEntity} from "./posts.entity";
 import {Repository} from "typeorm";
-import {PostsDto} from "./posts.dto";
-import * as EasyYandexS3 from "easy-yandex-s3";
+import { CreatePostsDto } from "./dto/createPosts.dto";
+import { FilesService } from "../files/files.service";
+import { SearchIdPostDto } from "./dto/searchIdPost.dto";
+import { DeleteIdPostDto } from "./dto/deleteIdPost.dto";
 import {
     paginate,
     Pagination,
@@ -11,10 +13,11 @@ import {
 } from 'nestjs-typeorm-paginate';
 
 
-
 @Injectable()
 export class PostsService {
-    constructor(@InjectRepository(PostsEntity) private postRepository: Repository<PostsEntity>) {}
+    constructor(@InjectRepository(PostsEntity) private postRepository: Repository<PostsEntity>,
+        private fileService: FilesService
+    ) {}
 
     async getAll(
       sort: string,
@@ -26,36 +29,24 @@ export class PostsService {
         // Если с клиента придет какая-либо сортировка, то сортируем от большего к меньшему, иначе от меньшего к большему
         const order = sort !== 'id' ? "DESC" : "ASC"
 
+        // if (filter){
+        //     const queryBuilder = await this.postRepository.createQueryBuilder('post')
+        //       .where('post.tags @> ARRAY[:...tags]', { tags: filter.split(',')})
+        //       .andWhere( 'post.title like :search', { search: `%${search}%` })
+        //       .orderBy(`${sort}`, `${order}` )
+        //
+        //     return await paginate<PostsEntity>( queryBuilder, options )
+        // }
 
-        if (search && filter){
-            const queryBuilder = await this.postRepository.createQueryBuilder('post')
-              .where('post.tags @> ARRAY[:...tags]', { tags: filter.split(',') })
-              .andWhere('post.title like %:search%', { search: search })
-              .orderBy(`${sort}`, `${order}` )
 
-            return await paginate<PostsEntity>( queryBuilder, options )
-        }
-        if (filter){
-            const queryBuilder = await this.postRepository.createQueryBuilder('post')
-              .where('post.tags @> ARRAY[:...tags]', { tags: filter.split(',')})
-              .orderBy(`${sort}`, `${order}` )
-
-            return await paginate<PostsEntity>( queryBuilder, options )
-        }
-
-        if (search){
-            const queryBuilder = await this.postRepository.createQueryBuilder('post')
-              .where( 'post.title like :search', { search: `%${search}%` })
-              .orderBy(`${sort}`, `${order}` )
-
-            return await paginate<PostsEntity>( queryBuilder, options )
-        }
+        const tags = filter ? filter.split(',') : await this.tags()
 
         const queryBuilder = await this.postRepository.createQueryBuilder('post')
+          .where( 'lower(post.title) like :search', { search: `%${search}%` })
+          .andWhere('post.tags && ARRAY[:...tags]', { tags: tags})
           .orderBy(`post.${sort}`, `${order}`)
         return await paginate<PostsEntity>( queryBuilder, options )
     }
-
 
     // Возвращает уникальные теги(категории) постов
     async tags() {
@@ -65,8 +56,7 @@ export class PostsService {
         return (uniqTags)
     }
 
-
-    async getById(id: number){
+    async getById(id: SearchIdPostDto){
         return await this.postRepository.findOne({
             where: {
                 id: Number(id)
@@ -74,50 +64,29 @@ export class PostsService {
         })
     }
 
-
-    async create(dto: PostsDto, file: Express.Multer.File){
+    async create(dto: CreatePostsDto, file: Express.Multer.File){
         try {
             const post = await this.postRepository.create({
                 ...dto,
-                imageUrl: await this.uploadImage(file),
+                imageUrl: await this.fileService.uploadImage(file),
                 date: Date.now()
             })
             await this.postRepository.save(post)
-            return {}
-        } catch (e){
+            return post
+        }
+         catch (e){
             console.log(e)
         }
     }
 
-    async updateById(id: number){
-        await this.postRepository.increment({id: id}, 'views_count', 1)
+    async updateById(id: SearchIdPostDto){
+        await this.postRepository.increment({id: Number(id)}, 'views_count', 1)
         return {message: 'Обновленно'}
     }
 
-
     // На данный момент не используется
-    async deleteById(id: number){
-        await this.postRepository.delete({id: id})
+    async deleteById(id: DeleteIdPostDto){
+        await this.postRepository.delete({id: Number(id)})
         return {message: 'Пост удален'}
-    }
-
-    // Скорее всего это нужно вынести с сервиса, но не знаю как
-    async uploadImage(file){
-        const s3 = new EasyYandexS3({
-            auth: {
-                accessKeyId: process.env.ACCESS_KEY_ID,
-                secretAccessKey: process.env.SECRET_ACCESS_KEY,
-            },
-            Bucket: `${process.env.BUCKET}`
-        })
-        try {
-            const upload = await s3.Upload({
-                buffer: file.buffer
-            },  process.env.BUCKET_DIR );
-            return upload.Location
-        }
-        catch (e) {
-            console.log('===>e', e)
-        }
     }
 }

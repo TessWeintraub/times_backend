@@ -3,6 +3,7 @@ import {TypeOrmModule} from "@nestjs/typeorm";
 import {ConfigModule} from "@nestjs/config";
 import { PostsModule } from './posts/posts.module';
 import { PostsEntity } from "./posts/posts.entity";
+import { FilesModule } from './files/files.module';
 
 
 
@@ -23,7 +24,8 @@ import { PostsEntity } from "./posts/posts.entity";
             entities: [PostsEntity],
             synchronize: true,
         }),
-        PostsModule
+        PostsModule,
+        FilesModule
     ]
 })
 export class AppModule {
