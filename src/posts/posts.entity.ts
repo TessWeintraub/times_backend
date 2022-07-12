@@ -3,12 +3,13 @@ import { ApiProperty } from "@nestjs/swagger";
 
 @Entity({name: 'Posts'})
 export class PostsEntity{
+
     @ApiProperty({example: 1, description: 'Уникальный идентификатор'})
     @PrimaryGeneratedColumn({type: 'integer'})
     id: number
 
     @ApiProperty({example: 'Title', description: 'Название'})
-    @Column()
+    @Column({type: 'text'})
     title: string
 
     @ApiProperty({example: 'Content', description: 'Контент'})
@@ -23,7 +24,7 @@ export class PostsEntity{
     @Column({type: 'text', array: true})
     tags: string[]
 
-    @ApiProperty({example: 10, description: 'Количество просмотров'})
+    @ApiProperty({example: 0, description: 'Количество просмотров'})
     @Column({type: 'integer', default: 0})
     views_count: number
 

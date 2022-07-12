@@ -26,18 +26,7 @@ export class PostsService {
       options: IPaginationOptions
     ): Promise<Pagination<PostsEntity>>
     {
-        // Если с клиента придет какая-либо сортировка, то сортируем от большего к меньшему, иначе от меньшего к большему
         const order = sort !== 'id' ? "DESC" : "ASC"
-
-        // if (filter){
-        //     const queryBuilder = await this.postRepository.createQueryBuilder('post')
-        //       .where('post.tags @> ARRAY[:...tags]', { tags: filter.split(',')})
-        //       .andWhere( 'post.title like :search', { search: `%${search}%` })
-        //       .orderBy(`${sort}`, `${order}` )
-        //
-        //     return await paginate<PostsEntity>( queryBuilder, options )
-        // }
-
 
         const tags = filter ? filter.split(',') : await this.tags()
 

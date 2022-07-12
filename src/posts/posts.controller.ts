@@ -10,7 +10,7 @@ import {
     Post,
     Query,
     UploadedFile,
-    UseInterceptors
+    UseInterceptors, UsePipes, ValidationPipe
 }
     from "@nestjs/common";
 import {PostsService} from "./posts.service";
@@ -22,6 +22,8 @@ import { CreatePostsDto } from "./dto/createPosts.dto";
 import { SearchIdPostDto } from "./dto/searchIdPost.dto";
 import { DeleteIdPostDto } from "./dto/deleteIdPost.dto";
 import { ApiImplicitFile } from "@nestjs/swagger/dist/decorators/api-implicit-file.decorator";
+import { ParseFormDataJsonPipe } from "../exceptions/ParseFormDataJsonPipe.pipe";
+import { ValidationPipeCreate } from "../pipes/validation.pipe";
 
 @Controller('posts')
 export class PostsController {
@@ -65,8 +67,8 @@ export class PostsController {
     @ApiBody({ description: 'Данные для создания', type: [CreatePostsDto]})
     @Post()
     @UseInterceptors(FileInterceptor('file'))
-    async create(@Body('body') dto: string, @UploadedFile() file: Express.Multer.File){
-        return this.postsService.create(JSON.parse(dto), file)
+    async create(@Body('body', new ParseFormDataJsonPipe(), new ValidationPipeCreate()) dto: CreatePostsDto, @UploadedFile() file: Express.Multer.File){
+        return this.postsService.create(dto, file)
     }
 
     // Обновление количества просмотров
@@ -84,4 +86,21 @@ export class PostsController {
     async deleteById(@Param('id') id: DeleteIdPostDto){
         return this.postsService.deleteById(id)
     }
+
+
+
+
+
+    // const newArticle = {
+    //     title: inputValue.title,
+    //     tags: inputValue.subtitle.split(',').map(tag => tag.trim()),
+    //     content: JSON.stringify(convertToRaw(editorState.getCurrentContent())),
+    //     userId: 1
+    // };
+    //
+    // const formData = new  FormData()
+    // formData.append('file', newImage)
+    // formData.append('body', JSON.stringify(newArticle))
+    // await axios.post('http://localhost:5000/posts', formData)
+    // .then(res => console.log(res.data))
 }
