@@ -31,9 +31,9 @@ export class PostsService {
         const tags = filter ? filter.split(',') : await this.tags()
 
         const queryBuilder = await this.postRepository.createQueryBuilder('post')
+          .orderBy(`post.${sort}`, `${order}`)
           .where( 'lower(post.title) like :search', { search: `%${search}%` })
           .andWhere('post.tags && ARRAY[:...tags]', { tags: tags})
-          .orderBy(`post.${sort}`, `${order}`)
         return await paginate<PostsEntity>( queryBuilder, options )
     }
 
