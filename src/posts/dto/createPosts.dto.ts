@@ -15,7 +15,7 @@ export class CreatePostsDto{
 
     @ApiProperty({example: ["tag", "tag", "tag"], description: 'Теги'})
     @IsArray({message: 'Должен быть массив'})
-    @IsString({ each: true , message: 'Должна быть строка'})
+    @IsString({ each: true , message: 'В массиве должна быть строка'})
     readonly tags: string[]
 
     @ApiProperty({example: 1, description: 'Идентификатор пользователя'})

@@ -54,6 +54,7 @@ export class PostsService {
     }
 
     async create(dto: CreatePostsDto, file: Express.Multer.File){
+        console.log(dto);
         try {
             const post = await this.postRepository.create({
                 ...dto,

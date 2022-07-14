@@ -4,6 +4,9 @@ import {ConfigModule} from "@nestjs/config";
 import { PostsModule } from './posts/posts.module';
 import { PostsEntity } from "./posts/posts.entity";
 import { FilesModule } from './files/files.module';
+import { UsersModule } from './users/users.module';
+import { UsersEntity } from "./users/users.entity";
+import { AuthModule } from './auth/auth.module';
 
 
 
@@ -21,11 +24,13 @@ import { FilesModule } from './files/files.module';
             username: process.env.POSTGRES_USER,
             password: process.env.POSTGRES_PASSWORD,
             database: process.env.POSTGRES_DB,
-            entities: [PostsEntity],
+            entities: [UsersEntity,PostsEntity],
             synchronize: true,
         }),
         PostsModule,
-        FilesModule
+        FilesModule,
+        UsersModule,
+        AuthModule
     ]
 })
 export class AppModule {

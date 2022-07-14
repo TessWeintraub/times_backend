@@ -5,7 +5,7 @@ export class ParseFormDataJsonPipe implements PipeTransform {
 
   transform(value: string) {
     try {
-      return deepParseJson(value)
+      return JSON.parse(value)
     }catch (e) {
       throw new BadRequestException('Не удалось распарсить тело')
     }
