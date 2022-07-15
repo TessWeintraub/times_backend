@@ -32,4 +32,7 @@ export class UsersEntity{
   @Column({type: 'bigint' })
   date: number
 
+  @ApiProperty({example: 'token', description: 'Refresh токен'})
+  @Column({type: 'text'})
+  refresh_token: string
 }

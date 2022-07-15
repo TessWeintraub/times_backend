@@ -4,10 +4,9 @@ import {
   Delete,
   Patch,
   Post,
-  Headers,
   UploadedFile,
   UseInterceptors,
-  UsePipes
+  UsePipes, UseGuards, Req, Get
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { ApiOperation, ApiResponse } from "@nestjs/swagger";
@@ -17,6 +16,7 @@ import { UsersEntity } from "./users.entity";
 import { CreateUsersDto } from "./dto/createUsers.dto";
 import { ApiImplicitFile } from "@nestjs/swagger/dist/decorators/api-implicit-file.decorator";
 import { JwtService } from "@nestjs/jwt";
+import {  JwtAuthGuardAccess } from "../auth/jwt-auth-access.guard";
 
 @Controller('users')
 export class UsersController {
@@ -43,16 +43,20 @@ export class UsersController {
     return this.usersService.uploadPhoto(2,file)
   }
 
-
-
   @ApiOperation({summary: 'Удаление профиля пользователя'})
   @ApiResponse({status: 201})
+  @UseGuards(JwtAuthGuardAccess)
   @Delete()
-
-  async delete(@Headers('authorization') token: string){
-    const decoderToken = this.jwtService.verify(token)
-    console.log(decoderToken);
-    // return this.usersService.delete({id})
+  async delete(@Req() request: Request){
+      // @ts-ignore
+    const {iat, exp, ...userInfo} = request.user
+    return this.usersService.delete(userInfo)
   }
 
+  @UseGuards(JwtAuthGuardAccess)
+  @Get()
+  async getByEmail(@Req() req: Request){
+    // @ts-ignore
+    return this.usersService.getUserByEmail(req.user.email)
+  }
 }
