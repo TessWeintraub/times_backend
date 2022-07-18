@@ -22,7 +22,7 @@ import { CreatePostsDto } from "./dto/createPosts.dto";
 import { SearchIdPostDto } from "./dto/searchIdPost.dto";
 import { DeleteIdPostDto } from "./dto/deleteIdPost.dto";
 import { ApiImplicitFile } from "@nestjs/swagger/dist/decorators/api-implicit-file.decorator";
-import { ParseFormDataJsonPipe } from "../exceptions/ParseFormDataJsonPipe.pipe";
+import { ParseFormDataJsonPipe } from "../pipes/ParseFormDataJsonPipe.pipe";
 import { ValidationPipeCreate } from "../pipes/validation.pipe";
 
 @Controller('posts')

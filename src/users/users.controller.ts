@@ -6,23 +6,24 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
-  UsePipes, UseGuards, Req, Get
+  UsePipes,
+  UseGuards,
+  Req,
+  Get
 } from "@nestjs/common";
-import { UsersService } from "./users.service";
 import { ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { ApiImplicitFile } from "@nestjs/swagger/dist/decorators/api-implicit-file.decorator";
+import { Request } from 'express';
+import { UsersService } from "./users.service";
 import { ValidationPipeCreate } from "../pipes/validation.pipe";
 import { UsersEntity } from "./users.entity";
 import { CreateUsersDto } from "./dto/createUsers.dto";
-import { ApiImplicitFile } from "@nestjs/swagger/dist/decorators/api-implicit-file.decorator";
-import { JwtService } from "@nestjs/jwt";
-import {  JwtAuthGuardAccess } from "../auth/jwt-auth-access.guard";
+import {  JwtAuthGuardAccess } from "../auth/guards/jwt-auth-access.guard";
 
 @Controller('users')
 export class UsersController {
-  constructor(private  readonly  usersService: UsersService,
-              private  readonly  jwtService: JwtService) {
-  }
+  constructor(private  readonly  usersService: UsersService,) {}
 
   // Создание пользователя, принимает данные для создания
   @ApiOperation({summary: 'Создание пользователя'})
@@ -56,7 +57,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuardAccess)
   @Get()
   async getByEmail(@Req() req: Request){
-    // @ts-ignore
+    // @ts-ignore;
     return this.usersService.getUserByEmail(req.user.email)
   }
 }

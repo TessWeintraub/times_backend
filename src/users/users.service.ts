@@ -1,17 +1,15 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { FilesService } from "../files/files.service";
 import { UsersEntity } from "./users.entity";
+import { FilesService } from "../files/files.service";
 import { CreateUsersDto } from "./dto/createUsers.dto";
 import { DeleteIdUserDto } from "./dto/deleteUser.dto";
-import { JwtService } from "@nestjs/jwt";
 
 @Injectable()
 export class UsersService {
   constructor(@InjectRepository(UsersEntity) private userRepository: Repository<UsersEntity>,
               private fileService: FilesService,
-              private  jwtService: JwtService
   ) {}
 
 
@@ -20,11 +18,9 @@ export class UsersService {
         ...dto,
         avatarUrl: '',
         date: Date.now(),
-        refresh_token: ''
       })
       await this.userRepository.save(user)
       return  user
-
   }
 
   async uploadPhoto(userId: number, file: Express.Multer.File){
@@ -57,10 +53,10 @@ export class UsersService {
   }
 
   async updatedRefreshToken(user: UsersEntity, newRefreshToken: string){
-    await this.userRepository.update({id: user.id, email: user.email}, {
+    await this.userRepository.update({email: user.email}, {
       refresh_token: newRefreshToken
     })
-    const updatedUser = await this.userRepository.findOne({where: {id: user.id, email: user.email}})
+    const updatedUser = await this.userRepository.findOne({where: {email: user.email}})
     return updatedUser.refresh_token
   }
 }

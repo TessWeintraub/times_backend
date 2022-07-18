@@ -1,10 +1,14 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable, UnauthorizedException } from "@nestjs/common";
-import { CreateUsersDto } from "../users/dto/createUsers.dto";
-import { UsersService } from "../users/users.service";
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException
+} from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt"
+import { CreateUsersDto } from "../users/dto/createUsers.dto";
+import { UsersService } from "../users/users.service";
 import { UsersEntity } from "../users/users.entity";
-import { ReqUserDto } from "./dto/reqUser.dto";
 
 @Injectable()
 export class AuthService {
@@ -14,9 +18,10 @@ export class AuthService {
 
   async login(userDto: CreateUsersDto){
     const user =  await this.validateUser(userDto)
+    const refreshToken = `Bearer ${this.jwtService.sign({email: userDto.email, refresh: true}, {expiresIn: '24h'})}`
     return {
       access_token: await this.generateToken(user),
-      refresh_token: user.refresh_token
+      refresh_token: await this.userService.updatedRefreshToken(user, refreshToken)
     }
   }
 
@@ -26,10 +31,10 @@ export class AuthService {
       throw  new HttpException('Пользователь уже зарегистрирован', HttpStatus.BAD_REQUEST)
     }
     const hashPassword = await bcrypt.hash(userDto.password, 5)
-    const user = await this.userService.create({...userDto, password: hashPassword})
+    const refreshToken = `Bearer ${this.jwtService.sign({email: userDto.email, refresh: true}, {expiresIn: '24h'})}`
 
-    const refreshToken = `Bearer ${this.jwtService.sign({id: user.id, email: user.email, refresh: true}, {expiresIn: '24h'})}`
-    await this.userService.updatedRefreshToken(user, refreshToken)
+    const user = await this.userService.create({...userDto, password: hashPassword, refresh_token: refreshToken})
+
     return {
       access_token: await this.generateToken(user),
       refresh_token: refreshToken
@@ -44,7 +49,6 @@ export class AuthService {
     return `Bearer ${this.jwtService.sign(payload)}`
   }
 
-
   private async validateUser(userDto: CreateUsersDto) {
     const user = await this.userService.getUserByEmail(userDto.email)
 
@@ -58,15 +62,22 @@ export class AuthService {
     }
   }
 
-  async refresh(userInfo: any, token){
+  async refresh(userInfo: any, token: string, response ){
+
     const user = await this.userService.getUserByEmail(userInfo.email)
-    if (!user || user.refresh_token !== token) throw new HttpException('Пользователь не обнаружен', 404)
-    const refreshToken = `Bearer ${this.jwtService.sign({id: user.id, email: user.email, refresh: true}, {expiresIn: '24h'})}`
+
+    if(!user || user.refresh_token !== token) {
+      throw new HttpException('Пользователь не обнаружен', 404)
+    }
+
+    const refreshToken = `Bearer ${this.jwtService.sign({email: user.email, refresh: true}, {expiresIn: '24h'})}`
+    const accessToken = await this.generateToken(userInfo)
+
     await this.userService.updatedRefreshToken(userInfo, refreshToken)
 
-    return {
-      access_token: await this.generateToken(userInfo),
-      refresh_token: refreshToken
-    }
+    response.cookie('access_token', accessToken)
+    response.cookie('refresh_token', refreshToken, {httpOnly: true})
+
+    return {message: 'Токены обновленны'}
   }
 }
