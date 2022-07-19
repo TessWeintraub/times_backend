@@ -18,7 +18,7 @@ export class AuthService {
 
   async login(userDto: CreateUsersDto){
     const user =  await this.validateUser(userDto)
-    const refreshToken = `Bearer ${this.jwtService.sign({email: userDto.email, refresh: true}, {expiresIn: '24h'})}`
+    const refreshToken = await this.generateRefreshToken(userDto.email)
     return {
       access_token: await this.generateToken(user),
       refresh_token: await this.userService.updatedRefreshToken(user, refreshToken)
@@ -31,7 +31,7 @@ export class AuthService {
       throw  new HttpException('Пользователь уже зарегистрирован', HttpStatus.BAD_REQUEST)
     }
     const hashPassword = await bcrypt.hash(userDto.password, 5)
-    const refreshToken = `Bearer ${this.jwtService.sign({email: userDto.email, refresh: true}, {expiresIn: '24h'})}`
+    const refreshToken = await this.generateRefreshToken(userDto.email)
 
     const user = await this.userService.create({...userDto, password: hashPassword, refresh_token: refreshToken})
 
@@ -47,6 +47,11 @@ export class AuthService {
       id: user.id,
     }
     return `Bearer ${this.jwtService.sign(payload)}`
+  }
+
+
+  async generateRefreshToken (email: string) {
+    return `Bearer ${this.jwtService.sign({email: email, refresh: true}, {expiresIn: '24h'})}`
   }
 
   private async validateUser(userDto: CreateUsersDto) {
@@ -70,8 +75,8 @@ export class AuthService {
       throw new HttpException('Пользователь не обнаружен', 404)
     }
 
-    const refreshToken = `Bearer ${this.jwtService.sign({email: user.email, refresh: true}, {expiresIn: '24h'})}`
     const accessToken = await this.generateToken(userInfo)
+    const refreshToken = await this.generateRefreshToken(userInfo.email)
 
     await this.userService.updatedRefreshToken(userInfo, refreshToken)
 

@@ -17,7 +17,7 @@ export class UsersEntity{
   last_name: string
 
   @ApiProperty({example: 'url', description: 'Ссылка на изображение'})
-  @Column({type: 'text'})
+  @Column({type: 'text', default: ''})
   avatarUrl: string
 
   @ApiProperty({example: 'email@mail.ru', description: 'Email пользователя'})
@@ -25,7 +25,7 @@ export class UsersEntity{
   email: string
 
   @ApiProperty({example: 'password', description: 'Пароль пользователя'})
-  @Column({type: 'text'})
+  @Column({type: 'text', nullable: true})
   password: string
 
   @ApiProperty({example: 1657529186632, description: 'Дата создания профиля'})
@@ -35,4 +35,8 @@ export class UsersEntity{
   @ApiProperty({example: 'token', description: 'Refresh токен'})
   @Column({type: 'text'})
   refresh_token: string
+
+  @ApiProperty({example: 'Google registration', description: 'Флаг регистрации через google'})
+  @Column({type: 'boolean', default: false})
+  is_registered_with_google: boolean
 }

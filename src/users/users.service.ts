@@ -16,7 +16,6 @@ export class UsersService {
   async create(dto: CreateUsersDto){
       const user = await this.userRepository.create({
         ...dto,
-        avatarUrl: '',
         date: Date.now(),
       })
       await this.userRepository.save(user)

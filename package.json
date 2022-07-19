@@ -38,6 +38,7 @@
     "deep-parse-json": "^1.0.2",
     "easy-yandex-s3": "^1.1.6",
     "fastify-cookie": "^5.7.0",
+    "googleapis": "^105.0.0",
     "nestjs-typeorm-paginate": "^4.0.1",
     "pg": "^8.7.3",
     "reflect-metadata": "^0.1.13",

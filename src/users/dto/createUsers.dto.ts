@@ -20,7 +20,7 @@ export class CreateUsersDto{
   @ApiProperty({example: 'Password', description: 'Пароль пользователя'})
   @IsString({message: 'Должна быть строка'})
   @Length(3, 100000,{message: "Длина строки меньше 3 либо больше n"})
-  readonly password: string
+  password: string
 
   refresh_token: string
 }
