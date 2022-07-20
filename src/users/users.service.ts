@@ -51,11 +51,4 @@ export class UsersService {
     })
   }
 
-  async updatedRefreshToken(user: UsersEntity, newRefreshToken: string){
-    await this.userRepository.update({email: user.email}, {
-      refresh_token: newRefreshToken
-    })
-    const updatedUser = await this.userRepository.findOne({where: {email: user.email}})
-    return updatedUser.refresh_token
-  }
 }

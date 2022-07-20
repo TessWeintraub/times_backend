@@ -7,6 +7,7 @@ import { FilesModule } from './files/files.module';
 import { UsersModule } from './users/users.module';
 import { UsersEntity } from "./users/users.entity";
 import { AuthModule } from './auth/auth.module';
+import { TokensModule } from "./auth/tokens/tokens.module";
 
 
 
@@ -30,6 +31,7 @@ import { AuthModule } from './auth/auth.module';
         PostsModule,
         FilesModule,
         UsersModule,
+        TokensModule,
         AuthModule
     ]
 })

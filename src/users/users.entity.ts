@@ -39,4 +39,8 @@ export class UsersEntity{
   @ApiProperty({example: 'Google registration', description: 'Флаг регистрации через google'})
   @Column({type: 'boolean', default: false})
   is_registered_with_google: boolean
+
+  @ApiProperty({example: 'GitHub registration', description: 'Флаг регистрации через github'})
+  @Column({type: 'boolean', default: false})
+  is_registered_with_github: boolean
 }

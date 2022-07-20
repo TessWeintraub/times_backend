@@ -5,12 +5,13 @@ import { JwtModule } from "@nestjs/jwt";
 import { GoogleAuthenticationService } from "./google.service";
 import { ConfigModule } from "@nestjs/config";
 import { AuthModule } from "../auth.module";
+import { TokensService } from "../tokens/tokens.service";
+import { TokensModule } from "../tokens/tokens.module";
 
 @Module({
   controllers: [GoogleController],
   providers: [GoogleAuthenticationService],
   imports: [
-    ConfigModule,
     forwardRef(()=> AuthModule),
     forwardRef(()=> UsersModule),
     JwtModule.register({
@@ -19,6 +20,8 @@ import { AuthModule } from "../auth.module";
         expiresIn: '1h'
       }
     }),
+    ConfigModule,
+    TokensModule,
     GoogleModule
   ],
 })

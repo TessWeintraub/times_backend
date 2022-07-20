@@ -3,7 +3,6 @@ import { ApiTags } from "@nestjs/swagger";
 import { Request, Response } from 'express';
 import { CreateUsersDto } from "../users/dto/createUsers.dto";
 import { AuthService } from "./auth.service";
-import { ResTokensDto } from "./dto/resTokens.dto";
 import { JwtCookieAuthGuardRefresh } from "./guards/jwt-cookie-auth-refresh.guard";
 
 @ApiTags('Авторизация')
@@ -13,18 +12,18 @@ export class AuthController {
   constructor(private  authService: AuthService) {}
 
   @Post('/login')
-  login(@Body() userDto: CreateUsersDto): Promise<ResTokensDto> {
-    return this.authService.login(userDto)
+  login(@Body() userDto: CreateUsersDto, @Res({ passthrough: true }) response: Response) {
+    return this.authService.login(userDto, response)
   }
 
   @Post('/registration')
-  registration(@Body() userDto: CreateUsersDto): Promise<ResTokensDto> {
-    return this.authService.registration(userDto)
+  registration(@Body() userDto: CreateUsersDto, @Res({ passthrough: true }) response: Response) {
+    return this.authService.registration(userDto, response)
   }
 
   @UseGuards(JwtCookieAuthGuardRefresh)
   @Get('/refresh')
-  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {;
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     //@ts-ignore
     return await this.authService.refresh(req.user, req.cookies.refresh_token, res)
   }
