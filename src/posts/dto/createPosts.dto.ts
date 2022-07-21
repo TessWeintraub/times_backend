@@ -18,7 +18,7 @@ export class CreatePostsDto{
     @IsString({ each: true , message: 'В массиве должна быть строка'})
     readonly tags: string[]
 
-    @ApiProperty({example: 1, description: 'Идентификатор пользователя'})
-    @IsNumber({},{message: 'Должно быть число'})
-    readonly userId: number
+    // @ApiProperty({example: 1, description: 'Идентификатор пользователя'})
+    // @IsNumber({},{message: 'Должно быть число'})
+    // readonly userId: number
 }

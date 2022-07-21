@@ -1,5 +1,6 @@
-import {Column, Entity, PrimaryGeneratedColumn} from "typeorm";
+import { Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { ApiProperty } from "@nestjs/swagger";
+import { PostsEntity } from "../posts/posts.entity";
 
 @Entity({name: 'Users'})
 export class UsersEntity{
@@ -18,7 +19,7 @@ export class UsersEntity{
 
   @ApiProperty({example: 'url', description: 'Ссылка на изображение'})
   @Column({type: 'text', default: ''})
-  avatarUrl: string
+  avatar_url: string
 
   @ApiProperty({example: 'email@mail.ru', description: 'Email пользователя'})
   @Column({type: 'text'})
@@ -32,6 +33,11 @@ export class UsersEntity{
   @Column({type: 'bigint' })
   date: number
 
+  @ApiProperty({example: '[1, 2, 3, 4]', description: 'Массив идентификаторов постов'})
+  // @Column({type: 'integer', array: true})
+  @OneToMany(() => PostsEntity, post => post.author, {cascade: true})
+  posts: PostsEntity[]
+
   @ApiProperty({example: 'token', description: 'Refresh токен'})
   @Column({type: 'text'})
   refresh_token: string
@@ -43,4 +49,5 @@ export class UsersEntity{
   @ApiProperty({example: 'GitHub registration', description: 'Флаг регистрации через github'})
   @Column({type: 'boolean', default: false})
   is_registered_with_github: boolean
+
 }

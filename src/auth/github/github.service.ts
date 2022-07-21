@@ -89,9 +89,8 @@ export class GithubAuthenticationService {
       email: userData.data.email || await this.emailUserFromGitHub(token),
       first_name: userData.data.name ? userData.data.name : userData.data.login,
       last_name: userData.data.name ? userData.data.name : userData.data.login,
-      avatarUrl: userData.data.avatar_url,
+      avatar_url: userData.data.avatar_url,
       is_registered_with_github: true,
-      password: ""
     }
   }
 

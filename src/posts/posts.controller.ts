@@ -8,8 +8,8 @@ import {
     ParseIntPipe,
     Patch,
     Post,
-    Query,
-    UploadedFile,
+    Query, Req,
+    UploadedFile, UseGuards,
     UseInterceptors, UsePipes, ValidationPipe
 }
     from "@nestjs/common";
@@ -24,6 +24,8 @@ import { DeleteIdPostDto } from "./dto/deleteIdPost.dto";
 import { ApiImplicitFile } from "@nestjs/swagger/dist/decorators/api-implicit-file.decorator";
 import { ParseFormDataJsonPipe } from "../pipes/ParseFormDataJsonPipe.pipe";
 import { ValidationPipeCreate } from "../pipes/validation.pipe";
+import { JwtAuthGuardAccess } from "../auth/guards/jwt-auth-access.guard";
+import { Request } from 'express';
 
 @Controller('posts')
 export class PostsController {
@@ -32,6 +34,7 @@ export class PostsController {
 
     @ApiOperation({summary: 'Массив постов'})
     @ApiResponse({status: 200, type: [PostsEntity]})
+    @UseGuards(JwtAuthGuardAccess)
     @Get()
     async getAll(
         @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
@@ -46,6 +49,7 @@ export class PostsController {
     // Вернет список категорий
     @ApiOperation({summary: 'Массив тегов для фильтрации'})
     @ApiResponse({status: 200, type: PostsEntity})
+    @UseGuards(JwtAuthGuardAccess)
     @Get('/tags')
     async getTags(){
         return this.postsService.tags()
@@ -54,6 +58,7 @@ export class PostsController {
     // Отдать пост по id
     @ApiOperation({summary: 'Поиск поста по идентификатору'})
     @ApiResponse({status: 200, type: PostsEntity})
+    @UseGuards(JwtAuthGuardAccess)
     @Get(':id')
     async getById(@Param('id') id: SearchIdPostDto){
         return this.postsService.getById(id)
@@ -64,16 +69,24 @@ export class PostsController {
     @ApiResponse({status: 201, type: [PostsEntity]})
     @ApiConsumes('multipart/form-data')
     @ApiImplicitFile({ name: 'file', required: true, description: 'Изображение' })
+    @UseGuards(JwtAuthGuardAccess)
     @ApiBody({ description: 'Данные для создания', type: [CreatePostsDto]})
     @Post()
     @UseInterceptors(FileInterceptor('file'))
-    async create(@Body('body', new ParseFormDataJsonPipe(), new ValidationPipeCreate()) dto: CreatePostsDto, @UploadedFile() file: Express.Multer.File){
-        return this.postsService.create(dto, file)
+    async create(
+      @Body('body', new ParseFormDataJsonPipe(),
+        new ValidationPipeCreate()) dto: CreatePostsDto,
+      @UploadedFile() file: Express.Multer.File,
+      @Req() request: Request
+    ){
+        // @ts-ignore
+        return this.postsService.create(dto, file, request.user)
     }
 
     // Обновление количества просмотров
     @ApiOperation({summary: 'Обновление количества просмотров поста'})
     @ApiResponse({status: 200})
+    @UseGuards(JwtAuthGuardAccess)
     @Patch(':id')
     async updateById(@Param('id') id: SearchIdPostDto){
         return this.postsService.updateById(id)
@@ -82,6 +95,7 @@ export class PostsController {
     // Удаление поста, сейчас не используется
     @ApiOperation({summary: 'Удаление поста'})
     @ApiResponse({status: 200, type: PostsEntity})
+    @UseGuards(JwtAuthGuardAccess)
     @Delete(':id')
     async deleteById(@Param('id') id: DeleteIdPostDto){
         return this.postsService.deleteById(id)

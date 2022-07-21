@@ -13,7 +13,6 @@ export class GithubController {
 
   @Post()
   async create(@Body('code') code: string, @Res({ passthrough: true }) response: Response) {
-    console.log(code);
     return await this.githubAuthenticationService.authenticate(code, response);
   }
 }

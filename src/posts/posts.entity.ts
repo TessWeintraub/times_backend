@@ -1,5 +1,6 @@
-import {Column, Entity, PrimaryGeneratedColumn} from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, TableForeignKey } from "typeorm";
 import { ApiProperty } from "@nestjs/swagger";
+import { UsersEntity } from "../users/users.entity";
 
 @Entity({name: 'Posts'})
 export class PostsEntity{
@@ -38,6 +39,6 @@ export class PostsEntity{
     timeRead: string
 
     @ApiProperty({example: 1, description: 'Идентификатор пользователя создавшего пост'})
-    @Column({type: 'integer'})
-    userId: number
+    @ManyToOne(() => UsersEntity, author=>author.posts)
+    author: UsersEntity
 }

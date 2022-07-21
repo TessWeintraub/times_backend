@@ -14,7 +14,6 @@ export class GoogleController {
 
   @Post()
   async create(@Body() tokenData: tokenVerificationDto, @Res({ passthrough: true }) response: Response) {
-    console.log(tokenData);
     return await this.googleAuthenticationService.authenticate(tokenData.token, response);
   }
 }

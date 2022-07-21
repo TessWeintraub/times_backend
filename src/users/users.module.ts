@@ -9,14 +9,14 @@ import { AuthModule } from "../auth/auth.module";
 
 @Module({
   providers: [UsersService],
-  imports: [TypeOrmModule.forFeature([UsersEntity]),
+  imports: [
+    TypeOrmModule.forFeature([UsersEntity]),
     FilesModule,
     JwtModule.register({
     secret: `${process.env.SECRET_KEY_JWT}`,
     signOptions: {
       expiresIn: '1h'
-    }
-  }),
+    }}),
     forwardRef(()=>AuthModule)
   ],
   controllers: [UsersController],

@@ -29,6 +29,7 @@ export class AuthService {
     response.cookie('access_token', accessToken)
     response.cookie('refresh_token', refreshToken, {httpOnly: true})
 
+    console.log(user);
     const {password, refresh_token, is_registered_with_google,  ...FilteredUser} = user
     return  FilteredUser
   }

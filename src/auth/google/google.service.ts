@@ -60,9 +60,8 @@ export class GoogleAuthenticationService {
     const newUser = {
       first_name: userData.given_name,
       last_name: userData.family_name,
-      avatarUrl: userData.picture,
+      avatar_url: userData.picture,
       email: userData.email,
-      password: "",
       is_registered_with_google: true,
       refresh_token: refreshToken
     }
