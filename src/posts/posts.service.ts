@@ -35,15 +35,22 @@ export class PostsService {
     const tags = filter ? filter.split(",") : await this.tags();
 
     const queryBuilder = await this.postRepository.createQueryBuilder("post")
+      .select('*')
+      .addSelect(`array_length('post.tags',1) `)
       .orderBy(`post.${sort}`, `${order}`)
       .leftJoinAndSelect('post.author', 'users')
       .where("lower(post.title) like :search", { search: `%${search}%` })
       .andWhere("post.tags && ARRAY[:...tags]", { tags: tags });
+    console.log(queryBuilder);
     return await paginate<PostsEntity>(queryBuilder, options);
   }
 
   // Возвращает уникальные теги(категории) постов
   async tags() {
+    const queryBuilder = await this.postRepository.createQueryBuilder("post")
+      .innerJoin('post.tags',`Count(post.tags) `)
+      .getMany()
+    console.log(queryBuilder);
     const allPosts = await this.postRepository.find();
     const allTags = allPosts.map(post => post.tags).flat();
     const uniqTags = [...new Set(allTags)];
@@ -55,7 +62,17 @@ export class PostsService {
       where: {
         id: Number(id)
       },
-      relations: ['Users']
+      relations: {
+        author: true
+      },
+      select: {
+        author: {
+          id: true,
+          first_name: true,
+          last_name: true,
+          avatar_url: true
+        },
+      }
     });
   }
 
@@ -64,7 +81,7 @@ export class PostsService {
     try {
       const post = await this.postRepository.create({
         ...dto,
-        imageUrl: await this.fileService.uploadImage(file),
+        image_url: await this.fileService.uploadImage(file),
         author: user,
         date: Date.now()
       });

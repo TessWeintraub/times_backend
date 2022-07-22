@@ -65,7 +65,9 @@ export class UsersService {
   async getUserByEmail(email: string){
     return await this.userRepository.findOne({
       where: { email },
-      relations: { posts: true}
+      relations:{
+        posts: true
+      }
     })
   }
 
