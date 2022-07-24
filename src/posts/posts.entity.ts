@@ -25,10 +25,12 @@ export class PostsEntity{
     @Column({type: 'text', array: true, name: 'tags'})
     tags: string[]
 
+    @Column({type: 'integer', array: true, name: 'viewed_users', select: false, default: []})
+    viewed_users: number[]
+
     @ApiProperty({example: 0, description: 'Количество просмотров'})
     @Column({type: 'integer', default: 0, name: 'views_count'})
     views_count: number
-
 
     @ApiProperty({example: 1657529186632, description: 'Дата создания'})
     @Column({type: 'bigint' , name: 'date'})

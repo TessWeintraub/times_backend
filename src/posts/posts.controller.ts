@@ -42,8 +42,8 @@ export class PostsController {
         @Query('sort', new DefaultValuePipe('id')) sort: string,
         @Query('filter') filter: string,
         @Query('search', new DefaultValuePipe('')) search: string
-    ): Promise<Pagination<PostsEntity>>{
-        return this.postsService.getAll(sort, filter, search,{page, limit})
+    ){
+        return this.postsService.getAll(sort, filter, search, {page, limit})
     }
 
     // Вернет список категорий
@@ -88,8 +88,9 @@ export class PostsController {
     @ApiResponse({status: 200})
     @UseGuards(JwtAuthGuardAccess)
     @Patch(':id')
-    async updateById(@Param('id') id: SearchIdPostDto){
-        return this.postsService.updateById(id)
+    async updateById(@Param('id') id: SearchIdPostDto, @Req() request: Request){
+        // @ts-ignore
+        return this.postsService.updateById(id, request.user.id)
     }
 
     // Удаление поста, сейчас не используется

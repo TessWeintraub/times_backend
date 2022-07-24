@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import {Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn, Table} from "typeorm";
 import { ApiProperty } from "@nestjs/swagger";
 import { PostsEntity } from "../posts/posts.entity";
 
@@ -22,15 +22,15 @@ export class UsersEntity{
   avatar_url: string
 
   @ApiProperty({example: 'email@mail.ru', description: 'Email пользователя'})
-  @Column({type: 'text', name: 'email'})
+  @Column({type: 'text', name: 'email', select: false})
   email: string
 
   @ApiProperty({example: 'password', description: 'Пароль пользователя'})
-  @Column({type: 'text', nullable: true, name: 'password'})
+  @Column({type: 'text', nullable: true, name: 'password', select: false})
   password: string
 
   @ApiProperty({example: 1657529186632, description: 'Дата создания профиля'})
-  @Column({type: 'bigint', name: 'date' })
+  @Column({type: 'bigint', name: 'date' , select: false})
   date: number
 
   @ApiProperty({example: '[1, 2, 3, 4]', description: 'Массив идентификаторов постов'})
