@@ -23,13 +23,12 @@ export class AuthService {
     const user =  await this.validateUser(userDto)
     const refreshToken = await this.tokenService.generateRefreshToken(userDto.email)
     const accessToken = await this.tokenService.generateToken(user)
-
     await this.tokenService.updRefTokenUserInDB(user, refreshToken)
 
     response.cookie('access_token', accessToken)
     response.cookie('refresh_token', refreshToken, {httpOnly: true})
+    response.cookie('is_auth', true)
 
-    console.log(user);
     const {password, refresh_token, is_registered_with_google,  ...FilteredUser} = user
     return  FilteredUser
   }
@@ -49,14 +48,14 @@ export class AuthService {
 
     response.cookie('access_token', await this.tokenService.generateToken(user))
     response.cookie('refresh_token', await this.tokenService.updRefTokenUserInDB(user, refreshToken), {httpOnly: true})
+    response.cookie('is_auth', true)
 
     const {password, refresh_token, is_registered_with_google,  ...FilteredUser} = user
     return  FilteredUser
   }
 
   private async validateUser(userDto: CreateUsersDto) {
-    const user = await this.userService.getUserByEmail(userDto.email)
-
+    const user = await this.userService.getUserByEmail(userDto.email, true)
     if(!user) {
       throw  new UnauthorizedException({ message: 'Пользователя с таким email не существует' })
     }
@@ -72,8 +71,9 @@ export class AuthService {
 
   async refresh(userInfo: any, token: string, response ){
 
-    const user = await this.userService.getUserByEmail(userInfo.email)
+    const user = await this.userService.getUserByEmail(userInfo.email, true)
 
+    console.log(user);
     if(!user || user.refresh_token !== token) {
       throw new HttpException('Пользователь не обнаружен', 404)
     }
@@ -85,6 +85,7 @@ export class AuthService {
 
     response.cookie('access_token', accessToken)
     response.cookie('refresh_token', refreshToken, {httpOnly: true})
+    response.cookie('is_auth', true)
 
     return {message: 'Токены обновленны'}
   }

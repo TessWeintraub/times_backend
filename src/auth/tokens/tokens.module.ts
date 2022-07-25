@@ -14,7 +14,7 @@ import { TokensController } from "./tokens.controller";
     JwtModule.register({
       secret: `${process.env.SECRET_KEY_JWT}`,
       signOptions: {
-        expiresIn: '1h'
+        expiresIn: '1m'
       }
     }),
   ],

@@ -12,7 +12,7 @@ export class AuthController {
   constructor(private  authService: AuthService) {}
 
   @Post('/login')
-  login(@Body() userDto: CreateUsersDto, @Res({ passthrough: true }) response: Response) {
+  login(@Body() userDto: CreateUsersDto, @Res({ passthrough: true }) response: Response, @Req() req: Request) {
     return this.authService.login(userDto, response)
   }
 

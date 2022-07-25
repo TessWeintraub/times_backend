@@ -49,26 +49,39 @@ export class UsersService {
     throw new HttpException( 'Такого пользователя не существует', 404)
   }
 
-  async updatePostsUser(email: string, post: PostsEntity){
-    const user = await this.getUserByEmail(email)
-    console.log(user);
-    await this.userRepository.update({id: user.id}, {
-      posts:  [...user.posts, post]
-    })
-    return await this.userRepository.findOne({
-      where: {
-        id: user.id
-      }
-    })
+
+  async getUserById(id: number){
+    return await this.userRepository.findOneBy({id})
   }
 
-  async getUserByEmail(email: string){
-    return await this.userRepository.findOne({
-      where: { email },
-      relations:{
-        posts: true
-      }
-    })
-  }
+  async getUserByEmail(email: string, isRelation?: boolean){
+    if (isRelation) {
+      return await this.userRepository.findOne({
+          where: { email: email },
+          relations: {
+            posts: true
+          },
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            email: true,
+            password: true,
+            date: true,
+            avatar_url: true,
+            refresh_token: true,
+            posts: {
+              id: true,
+              image_url: true,
+              title: true,
+              content: true,
+              time_read: true
+            }
 
+          }
+        }
+        )
+    }
+   return await this.userRepository.findOneBy({email})
+  }
 }

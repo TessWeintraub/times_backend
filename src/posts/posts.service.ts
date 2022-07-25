@@ -40,33 +40,17 @@ export class PostsService {
       .leftJoinAndSelect('post.author', 'users')
       .where("lower(post.title) like :search", { search: `%${search}%` })
       .andWhere("post.tags && ARRAY[:...tags]", { tags: tags })
-
-    const test = await this.postRepository.query(`
-    SELECT
-    post.* ,
-    ARRAY_LENGTH("post"."tags", 1) AS "views_count"
-    FROM "PostsEntity" as "post"
-     LEFT OUTER JOIN "UsersEntity" ON "UsersEntity"."id"="post"."author"
-    WHERE lower("post"."title") like '%${search}%' ORDER BY "post"."id" ASC
-    `)
-    console.log(test)
    return await paginate(queryBuilder, options)
   }
 
   // Возвращает уникальные теги(категории) постов+
   async tags() {
-     // const test3 = await  this.postRepository.query(`
-     // SELECT ARRAY(SELECT DISTINCT UNNEST(posts.tags) FROM posts ) as tags
-     // `)
-    const test = await this.postRepository.query(`
-    SELECT "posts".*, "UsersEntity"."id" as "author_id"  FROM "PostsEntity" as "posts" LEFT OUTER JOIN "UsersEntity" ON "UsersEntity"."id" = "posts"."author"
-    `)
-    console.log(test)
-    const allPosts = await this.postRepository.find();
-    const allTags = allPosts.map(post => post.tags).flat();
-    const uniqTags = [...new Set(allTags)];
-    return (uniqTags);
+    const extendTags = await this.postRepository.createQueryBuilder('post')
+      .select('ARRAY(SELECT DISTINCT UNNEST("posts"."tags") FROM "PostsEntity" as "posts")', "uniqTags")
+      .getRawOne()
+    return extendTags.uniqTags
   }
+
 
   async getById(id: SearchIdPostDto) {
     return await this.postRepository.findOne({
@@ -96,8 +80,10 @@ export class PostsService {
         author: user,
         date: Date.now()
       });
-      await this.postRepository.save(post);
-      return post;
+
+      const {viewed_users, ...payload} = await this.postRepository.save(post)
+
+      return payload;
     } catch (e) {
       console.log(e);
     }

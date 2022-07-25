@@ -8,10 +8,12 @@ export class JwtCookieAuthGuardRefresh implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const req = context.switchToHttp().getRequest()
+    const res = context.switchToHttp().getResponse()
 
     const cookies = req.cookies.refresh_token
 
     if (!cookies) {
+      res.cookie('is_auth', false)
       throw new UnauthorizedException({ message: 'Токен не обнаружен' })
     }
 
@@ -19,12 +21,14 @@ export class JwtCookieAuthGuardRefresh implements CanActivate {
     const token = cookies.split(' ')[1]
 
     if (bearer !== 'Bearer' || !token){
+      res.cookie('is_auth', false)
       throw new UnauthorizedException({message: 'Не верный токен'})
     }
 
     const decodedToken = this.jwtService.verify(token)
 
     if (!decodedToken.refresh) {
+      res.cookie('is_auth', false)
       throw new UnauthorizedException({message: 'Используется Access token'})
     }
     req.user = decodedToken
