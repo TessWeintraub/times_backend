@@ -24,6 +24,7 @@ export class AuthController {
   @UseGuards(JwtCookieAuthGuardRefresh)
   @Get('/refresh')
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    console.log(req.cookies)
     //@ts-ignore
     return await this.authService.refresh(req.user, req.cookies.refresh_token, res)
   }

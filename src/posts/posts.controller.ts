@@ -51,7 +51,8 @@ export class PostsController {
     @ApiResponse({status: 200, type: PostsEntity})
     @UseGuards(JwtAuthGuardAccess)
     @Get('/tags')
-    async getTags(){
+    async getTags(@Req() req: Request){
+        console.log(req.cookies)
         return this.postsService.tags()
     }
 
