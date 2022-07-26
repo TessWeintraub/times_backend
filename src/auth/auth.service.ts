@@ -26,9 +26,8 @@ export class AuthService {
     await this.tokenService.updRefTokenUserInDB(user, refreshToken)
 
     response.cookie('access_token', accessToken, {domain: "127.0.0.1", path: "/", maxAge: 3900000} )
-    response.cookie('refresh_token', refreshToken, {httpOnly: true, domain: "127.0.0.1", path: "/auth/refresh", maxAge: 180000})
+    response.cookie('refresh_token', refreshToken, {httpOnly: true, domain: "127.0.0.1", path: "/auth/refresh", maxAge: 3900000})
     response.cookie('is_auth', true, {domain: "127.0.0.1", path: "/", maxAge: 3900000})
-
     const {password, refresh_token, is_registered_with_google,  ...FilteredUser} = user
     return  FilteredUser
   }
@@ -54,7 +53,7 @@ export class AuthService {
     response.cookie(
         'refresh_token',
         await this.tokenService.updRefTokenUserInDB(user, refreshToken),
-        {httpOnly: true, domain: "127.0.0.1", path: "/auth/refresh", maxAge: 180000}
+        {httpOnly: true, domain: "127.0.0.1", path: "/auth/refresh", maxAge: 3900000}
     )
     response.cookie(
         'is_auth',
@@ -96,10 +95,9 @@ export class AuthService {
     await this.tokenService.updRefTokenUserInDB(userInfo, refreshToken)
 
     response.cookie('access_token', accessToken, {domain: "127.0.0.1", path: "/", maxAge: 3900000} )
-    response.cookie('refresh_token', refreshToken, {httpOnly: true, domain: "127.0.0.1", path: "/auth/refresh", maxAge: 180000})
+    response.cookie('refresh_token', refreshToken, {httpOnly: true, domain: "127.0.0.1", path: "/auth/refresh", maxAge: 3900000})
     response.cookie('is_auth', true, {domain: "127.0.0.1", path: "/", maxAge: 3900000})
 
     return {message: 'Токены обновленны'}
   }
-
 }
