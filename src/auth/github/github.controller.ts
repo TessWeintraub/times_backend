@@ -7,7 +7,7 @@ import {
 import { Response } from "express";
 import { GithubAuthenticationService } from "./github.service";
 
-@Controller('github-authentication')
+@Controller('auth/github-authentication')
 export class GithubController {
   constructor(private readonly githubAuthenticationService: GithubAuthenticationService){}
 

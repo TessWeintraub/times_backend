@@ -8,12 +8,15 @@ import { Response } from 'express';
 import { GoogleAuthenticationService } from './google.service';
 import tokenVerificationDto from "./dto/tokenVerification.dto";
 
-@Controller('google-authentication')
+
+@Controller('auth/google-authentication')
 export class GoogleController {
   constructor(private readonly googleAuthenticationService: GoogleAuthenticationService) {}
 
   @Post()
   async create(@Body() tokenData: tokenVerificationDto, @Res({ passthrough: true }) response: Response) {
-    return await this.googleAuthenticationService.authenticate(tokenData.token, response);
+    const test = await this.googleAuthenticationService.authenticate(tokenData.token, response);
+    console.log(test);
+    return test
   }
 }

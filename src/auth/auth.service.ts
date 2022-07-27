@@ -1,10 +1,12 @@
 import {
+  ExecutionContext,
   HttpException,
   HttpStatus,
   Injectable,
   UnauthorizedException
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
+import { Request, Response } from 'express';
 import * as bcrypt from "bcrypt"
 import { CreateUsersDto } from "../users/dto/createUsers.dto";
 import { UsersService } from "../users/users.service";
@@ -25,9 +27,9 @@ export class AuthService {
     const accessToken = await this.tokenService.generateToken(user)
     await this.tokenService.updRefTokenUserInDB(user, refreshToken)
 
-    response.cookie('access_token', accessToken, {domain: "127.0.0.1", path: "/", maxAge: 3900000} )
-    response.cookie('refresh_token', refreshToken, {httpOnly: true, domain: "127.0.0.1", path: "/auth/refresh", maxAge: 3900000})
-    response.cookie('is_auth', true, {domain: "127.0.0.1", path: "/", maxAge: 3900000})
+    response.cookie('access_token', accessToken, {domain: "justicetimes.com", path: "/", maxAge: 3900000} )
+    response.cookie('refresh_token', refreshToken, {httpOnly: true, domain: "justicetimes.com", path: "/auth/refresh", maxAge: 3900000})
+    response.cookie('is_auth', true, {domain: "justicetimes.com", path: "/", maxAge: 3900000})
     const {password, refresh_token, is_registered_with_google,  ...FilteredUser} = user
     return  FilteredUser
   }
@@ -48,17 +50,17 @@ export class AuthService {
     response.cookie(
         'access_token',
         await this.tokenService.generateToken(user),
-        {domain: "127.0.0.1", path: "/", maxAge: 3900000}
+        {domain: "justicetimes.com", path: "/", maxAge: 3900000}
     )
     response.cookie(
         'refresh_token',
         await this.tokenService.updRefTokenUserInDB(user, refreshToken),
-        {httpOnly: true, domain: "127.0.0.1", path: "/auth/refresh", maxAge: 3900000}
+        {httpOnly: true, domain: "justicetimes.com", path: "/auth/refresh", maxAge: 3900000}
     )
     response.cookie(
         'is_auth',
         true,
-        {domain: "127.0.0.1", path: "/", maxAge: 3900000}
+        {domain: "justicetimes.com", path: "/"}
     )
 
     const {password, refresh_token, is_registered_with_google,  ...FilteredUser} = user
@@ -84,7 +86,6 @@ export class AuthService {
 
     const user = await this.userService.getUserByEmail(userInfo.email, true)
 
-    console.log(user);
     if(!user || user.refresh_token !== token) {
       throw new HttpException('Пользователь не обнаружен', 404)
     }
@@ -94,10 +95,17 @@ export class AuthService {
 
     await this.tokenService.updRefTokenUserInDB(userInfo, refreshToken)
 
-    response.cookie('access_token', accessToken, {domain: "127.0.0.1", path: "/", maxAge: 3900000} )
-    response.cookie('refresh_token', refreshToken, {httpOnly: true, domain: "127.0.0.1", path: "/auth/refresh", maxAge: 3900000})
-    response.cookie('is_auth', true, {domain: "127.0.0.1", path: "/", maxAge: 3900000})
+    response.cookie('access_token', accessToken, {domain: "justicetimes.com", path: "/", maxAge: 3900000} )
+    response.cookie('refresh_token', refreshToken, {httpOnly: true, domain: "justicetimes.com", path: "/auth/refresh", maxAge: 3900000})
+    response.cookie('is_auth', true, {domain: "justicetimes.com", path: "/", maxAge: 3900000})
 
     return {message: 'Токены обновленны'}
+  }
+
+  async logout (cookies: object, response: Response) {
+    response.cookie('access_token', null, {domain: "justicetimes.com", path: "/", maxAge: -1} )
+    response.cookie('refresh_token', null, {httpOnly: true, domain: "justicetimes.com", path: "/auth/refresh", maxAge: -1})
+    response.cookie('is_auth', null, {domain: "justicetimes.com", path: "/", maxAge: -1})
+    return {}
   }
 }

@@ -11,7 +11,7 @@ export class JwtCookieAuthGuardRefresh implements CanActivate {
     const res = context.switchToHttp().getResponse()
 
     const cookies = req.cookies.refresh_token
-    console.log(cookies);
+
     if (!cookies) {
       res.cookie('is_auth', false)
       throw new UnauthorizedException({ message: 'Токен не обнаружен' })

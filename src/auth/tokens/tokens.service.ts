@@ -28,7 +28,9 @@ export class TokensService {
     await this.userRepositoryTT.update({email: user.email}, {
       refresh_token: newRefreshToken
     })
-    const updatedUser = await this.userRepositoryTT.findOne({where: {email: user.email}})
+    console.log('new ===> ',newRefreshToken);
+    const updatedUser = await this.userRepositoryTT.findOne({where: {email: user.email}, select: {refresh_token: true}})
+    console.log('upd ===> ',updatedUser.refresh_token);
     return updatedUser.refresh_token
   }
 }

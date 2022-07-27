@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { CreateUsersDto } from "../users/dto/createUsers.dto";
 import { AuthService } from "./auth.service";
 import { JwtCookieAuthGuardRefresh } from "./guards/jwt-cookie-auth-refresh.guard";
+import { JwtAuthGuardAccess } from "./guards/jwt-auth-access.guard";
 
 @ApiTags('Авторизация')
 @Controller('auth')
@@ -24,9 +25,15 @@ export class AuthController {
   @UseGuards(JwtCookieAuthGuardRefresh)
   @Get('/refresh')
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    console.log(req.cookies)
     //@ts-ignore
     return await this.authService.refresh(req.user, req.cookies.refresh_token, res)
+  }
+
+  @UseGuards(JwtAuthGuardAccess)
+  @Get('/logout')
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    //@ts-ignore
+    return await this.authService.logout(req.cookies, res)
   }
 }
 

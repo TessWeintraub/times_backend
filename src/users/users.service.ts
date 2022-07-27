@@ -70,6 +70,8 @@ export class UsersService {
             date: true,
             avatar_url: true,
             refresh_token: true,
+            is_registered_with_google: true,
+            is_registered_with_github: true,
             posts: {
               id: true,
               image_url: true,

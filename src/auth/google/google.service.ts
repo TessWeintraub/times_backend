@@ -48,8 +48,11 @@ export class GoogleAuthenticationService {
     const accessToken = await this.tokensService.generateToken(user)
     const newRefreshToken = await this.tokensService.generateRefreshToken(user.email)
 
-    response.cookie("access_token", accessToken)
-    response.cookie("refresh_token", newRefreshToken, { httpOnly: true })
+    await this.tokensService.updRefTokenUserInDB(user, newRefreshToken)
+
+    response.cookie('access_token', accessToken, {domain: "justicetimes.com", path: "/", maxAge: 3900000} )
+    response.cookie('refresh_token', newRefreshToken, {httpOnly: true, domain: "justicetimes.com", path: "/auth/refresh", maxAge: 3900000})
+    response.cookie('is_auth', true, {domain: "justicetimes.com", path: "/", maxAge: 3900000})
     const { password, refresh_token, is_registered_with_google, is_registered_with_github, ...userSecure } = user
     return userSecure
   }
@@ -68,19 +71,21 @@ export class GoogleAuthenticationService {
 
     const user = await this.usersService.create(newUser)
 
-    response.cookie("access_token", await this.tokensService.generateToken(user))
-    response.cookie("refresh_token", refreshToken, { httpOnly: true })
+    response.cookie('access_token', await this.tokensService.generateToken(user),{domain: "justicetimes.com", path: "/", maxAge: 3900000} )
+    response.cookie('refresh_token', refreshToken, {httpOnly: true, domain: "justicetimes.com", path: "/auth/refresh", maxAge: 3900000})
+    response.cookie('is_auth', true, {domain: "justicetimes.com", path: "/", maxAge: 3900000})
     const { password, refresh_token, is_registered_with_google, is_registered_with_github, ...userSecure } = user
     return userSecure
   }
 
   async authenticate(token: string, response: Response) {
     const tokenInfo = await this.oauthClient.getTokenInfo(token)
+
     const email = tokenInfo.email
-    const user = await this.usersService.getUserByEmail(email)
+
+    const user = await this.usersService.getUserByEmail(email, true)
 
     if (!user) return await this.registerUser(token, response)
-
     return await this.handleRegisteredUser(user, response)
   }
 }

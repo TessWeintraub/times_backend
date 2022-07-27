@@ -18,7 +18,7 @@ async function start(){
 
     await app.enableCors({
         credentials: true,
-        origin: 'http://127.0.0.1:3000'
+        origin: 'http://justicetimes.com:3000'
     });
 
     await app.use(cookieParser());
